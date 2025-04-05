@@ -1,0 +1,33 @@
+name: CI Pipeline - PFA
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  check-frontend-backend:
+    name: Vérification des changements
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v3
+
+      - name: Vérification de la présence du fichier HTML
+        run: |
+          if [ -f "app1.html" ]; then
+            echo "Fichier HTML trouvé : OK"
+          else
+            echo "Erreur : Fichier HTML manquant"
+            exit 1
+          fi
+
+      - name: Vérification du fichier backend (.ino)
+        run: |
+          if [ -f "appclimatistion.ino.ino" ]; then
+            echo "Fichier INO trouvé : OK"
+          else
+            echo "Erreur : Fichier .ino manquant"
+            exit 1
+          fi
