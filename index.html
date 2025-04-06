@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart AC Controller</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f0f4f7;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #007BFF;
+    }
+    .section {
+      background: white;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin: 10px 0 5px;
+    }
+    select, input[type="number"] {
+      padding: 5px;
+      width: 100%;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .status {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <h1>Contrôle Intelligent de la Climatisation</h1>
+
+  <div class="section">
+    <h2>🔍 Température et Humidité en Temps Réel</h2>
+    <p><strong>Température:</strong> <span id="temperature">--</span> °C</p>
+    <p><strong>Humidité:</strong> <span id="humidity">--</span> %</p>
+    <button onclick="fetchThingSpeak()">🔄 Rafraîchir</button>
+  </div>
+
+  <div class="section">
+    <h2>⚙️ Configuration du Système</h2>
+
+    <label for="seuil">Choisir un seuil de température (°C) :</label>
+    <input type="number" id="seuil" min="10" max="50" placeholder="Ex: 30" />
+
+    <label for="temperatureFixe">Fixer une température cible (°C) :</label>
+    <input type="number" id="temperatureFixe" min="16" max="30" placeholder="Ex: 22" />
+
+    <label for="mode">Mode de climatisation :</label>
+    <select id="mode">
+      <option value="cool">Froid</option>
+      <option value="heat">Chaud</option>
+      <option value="auto">Automatique</option>
+    </select>
+
+    <button onclick="activerClim()">Activer la climatisation</button>
+    <button onclick="desactiverClim()">Désactiver la climatisation</button>
+
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <script>
+    async function fetchThingSpeak() {
+      try {
+        const url = "https://api.thingspeak.com/channels/2871990/feeds.json?api_key=4BPEKK2OPE4Y6NNT&results=1";
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const latest = data.feeds[0];
+        const temperature = latest.field1;
+        const humidity = latest.field2;
+
+        document.getElementById("temperature").textContent = temperature || "--";
+        document.getElementById("humidity").textContent = humidity || "--";
+      } catch (err) {
+        console.error("Erreur lors de la récupération des données ThingSpeak:", err);
+        document.getElementById("temperature").textContent = "--";
+        document.getElementById("humidity").textContent = "--";
+      }
+    }
+
+    function activerClim() {
+      const seuil = document.getElementById("seuil").value;
+      const temperatureFixe = document.getElementById("temperatureFixe").value;
+      const mode = document.getElementById("mode").value;
+
+      const message = `✅ Climatisation ACTIVÉE\nMode: ${mode}\nTemp cible: ${temperatureFixe}°C\nSeuil: ${seuil}°C`;
+      document.getElementById("statusMsg").textContent = message;
+      console.log(message);
+    }
+
+    function desactiverClim() {
+      const message = "🛑 Climatisation DÉSACTIVÉE";
+      document.getElementById("statusMsg").textContent = message;
+      console.log(message);
+    }
+
+    // Chargement initial
+    fetchThingSpeak();
+  </script>
+</body>
+</html>
